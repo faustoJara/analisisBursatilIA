@@ -45,5 +45,5 @@ Sigue estos pasos en orden cronológico para replicar el entorno de desarrollo l
 
 ### 1. Clonar el repositorio e ingresar al directorio
 ```bash
-git clone [https://github.com/tu-usuario/HedgeMind-NVDA.git](https://github.com/tu-usuario/HedgeMind-NVDA.git)
-cd HedgeMind-NVDA
+git clone [https://github.com/tu-usuario/analisisBursatilIA.git](https://github.com/tu-usuario/analisisBursalilIA.git)
+cd analisisBursatilIA
