@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("HedgeMind_Pipeline")
 
 logger.info("==============================================================================")
-logger.info("INICIALIZANDO SCRIPT MAESTRO: CONEXIONES REALES AWS Y PROCESAMIENTO")
+logger.info("INICIALIZANDO SCRIPT: CONEXIONES AWS Y PROCESAMIENTO")
 logger.info("==============================================================================")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -35,11 +35,10 @@ class HedgeMindDataPipeline:
         self.start_date = start_date
         self.dataset_raw_market = None
         self.dataset_master_sql = None
-        self.engine = None # Motor SQL Real
+        self.engine = None # Motor SQL
 
     def fase_1_despliegue_arquitectura(self):
-        """Conecta de VERDAD con la base de datos MariaDB alojada en Amazon RDS."""
-        logger.info("[ETAPA 1/4]: Verificando conectividad real de la arquitectura Cloud...")
+        logger.info("[ETAPA 1/4]: Verificando conectividad de la arquitectura Cloud...")
         try:
             db_user = os.getenv("DB_USER")
             db_pass = os.getenv("DB_PASSWORD")
@@ -47,13 +46,13 @@ class HedgeMindDataPipeline:
             db_port = os.getenv("DB_PORT") # Debe ser 3306 en tu .env
             db_name = os.getenv("DB_NAME")
             
-            # Conector real de MySQL/MariaDB
+            # Conector de MySQL/MariaDB
             conexion_str = f"mysql+mysqlconnector://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
             self.engine = create_engine(conexion_str)
             
             # Intentamos abrir la puerta de AWS para confirmar que la contraseña y el puerto son correctos
             with self.engine.connect() as conn:
-                logger.info("  ✅ Connection Status: Amazon RDS MariaDB Cloud -> [CONECTADO DE VERDAD]")
+                logger.info("  ✅ Connection Status: Amazon RDS MariaDB Cloud")
                 
         except Exception as e:
             logger.error(f"Fallo crítico conectando a Amazon RDS. Revisa tu .env y el Grupo de Seguridad de AWS: {str(e)}")
