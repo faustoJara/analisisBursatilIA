@@ -22,3 +22,7 @@ matplotlib>=3.7.2
 seaborn>=0.12.2
 
 sqlalchemy psycopg2-binary
+xgboost lightgbm catboost
+vadersentiment transformers datasets
+kagglehub
+kafka-python redis beautifulsoup4

@@ -1,25 +1,16 @@
-version: '3.8'
+name: hedgemind-streaming
 
 services:
-  # 1. REDIS (Para almacenamiento en caché de alta velocidad)
-  redis-cache:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    command: redis-server --save 60 1 --loglevel warning
-
-  # 2. ZOOKEEPER (El orquestador obligatorio para que Kafka funcione)
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
+    image: confluentinc/cp-zookeeper:7.4.0
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
 
-  # 3. APACHE KAFKA (El bus de streaming para las noticias)
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.4.0
     depends_on:
       - zookeeper
     ports:
@@ -29,3 +20,17 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  nifi:
+    image: apache/nifi:latest
+    ports:
+      - "8444:8443"
+    environment:
+      - SINGLE_USER_CREDENTIALS_USERNAME=admin
+      - SINGLE_USER_CREDENTIALS_PASSWORD=HedgeMind2026!
+      - NIFI_WEB_PROXY_HOST=localhost:8444
