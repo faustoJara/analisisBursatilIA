@@ -3,6 +3,26 @@ import redis
 from kafka import KafkaConsumer
 from bs4 import BeautifulSoup
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from pymongo import MongoClient
+import mysql.connector
+from datetime import datetime
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+# Iniciamos las conexiones
+mongo_client = MongoClient(os.getenv("MONGO_URI"))
+mongo_db = mongo_client['TV_StreamDB']
+col_noticias = mongo_db['noticias_raw']
+
+# MariaDB / RDS
+db_sql = mysql.connector.connect(
+    host=os.getenv("DB_HOST"), # O tu endpoint de AWS
+    user=os.getenv("DB_USER"), # El usuario que configuraste en tu RDS
+    password=os.getenv("DB_PASSWORD"), # La contraseña que configuraste en tu RDS
+    database="tfm_db"
+)
+cursor_sql = db_sql.cursor()
 
 print("🔌 Iniciando motores de Streaming...")
 
@@ -19,10 +39,11 @@ print("🎧 Escuchando el canal 'noticias_mercado' de Kafka...")
 consumer = KafkaConsumer(
     'noticias_mercado',
     bootstrap_servers=['localhost:9092'],
-    auto_offset_reset='latest', # Leer solo las noticias nuevas desde ahora
+    auto_offset_reset='earliest', # leer desde el principio del stream
     enable_auto_commit=True,
-    group_id='hedgemind-group'
+    group_id='hedgemind-group-1'
 )
+print("🎧 Escuchando... (Esperando eventos en tiempo real)")
 
 # 4. El Bucle Infinito (Procesamiento en Tiempo Real)
 for mensaje in consumer:
@@ -48,6 +69,15 @@ for mensaje in consumer:
                 
             # Calculamos la media del sentimiento del boletín
             media_sentimiento = sentimiento_total / 5
+            
+            # 1. MongoDB: Guardamos datos en crudo
+            col_noticias.insert_one({"xml_raw": xml_crudo, "timestamp": datetime.now()})
+
+            # 2. SQL: Guardamos datos para el entrenamiento (Hito 3)
+            sql = "INSERT INTO nvidia_historico (fecha, sentimiento, volumen_noticias) VALUES (%s, %s, %s)"
+            cursor_sql.execute(sql, (datetime.now().strftime('%Y-%m-%d'), media_sentimiento, len(titulares)))
+            db_sql.commit()
+                        
             
             # 5. Guardar en Redis para que el XGBoost lo lea instantáneamente
             cache.set('nvda_current_sentiment', media_sentimiento)

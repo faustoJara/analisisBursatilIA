@@ -18,3 +18,4 @@ __pycache__/
 # conda activate tfm_ai
 raw_analyst_headlines.csv
 raw_analyst_ratings.csv
+

@@ -26,3 +26,4 @@ xgboost lightgbm catboost
 vadersentiment transformers datasets
 kagglehub
 kafka-python redis beautifulsoup4
+mysql-connector-python pymongo boto3 python-dotenv
