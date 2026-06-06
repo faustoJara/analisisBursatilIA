@@ -1,69 +1,64 @@
-# HedgeMind-NVDA 🚀 📈
+# 📈 HedgeMind AI: Motor Predictivo Direccional para NVIDIA (NVDA)
 
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![Docker](https://img.shields.io/badge/Docker-Integrado-2496ED.svg)
+![AWS RDS](https://img.shields.io/badge/AWS_RDS-Data_Warehouse-FF9900.svg)
+![MongoDB](https://img.shields.io/badge/MongoDB-Data_Lake-47A248.svg)
+![XGBoost](https://img.shields.io/badge/Machine_Learning-XGBoost-F37626.svg)
+![Hugging Face](https://img.shields.io/badge/Despliegue-Hugging_Face-FFD21E.svg)
 
+**Autor:** Fausto Jara Buncay
+**Contexto:** Trabajo de Fin de Máster (TFM) - Arquitectura Big Data e Inteligencia Artificial.
 
-### Sistema Híbrido de Predicción Bursátil Mediante Ingeniería de Datos y Análisis de Sentimiento
-
-[![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/)
-[![PyTorch 2.6.0](https://img.shields.io/badge/PyTorch-2.6.0--cu124-orange.svg)](https://pytorch.org/)
-[![CUDA 12.4](https://img.shields.io/badge/CUDA-12.4-green.svg)](https://developer.nvidia.com/cuda-toolkit)
-[![Apache NiFi](https://img.shields.io/badge/Apache-NiFi-svg.svg?color=teal)](https://nifi.apache.org/)
-
-**HedgeMind-NVDA** es un ecosistema híbrido de Inteligencia Artificial e Ingeniería de Datos diseñado para predecir la variación porcentual diaria del activo **NVIDIA Corporation (NASDAQ: NVDA)**. 
-
-A diferencia de los modelos tradicionales basados exclusivamente en series temporales cuantitativas, este sistema implementa una arquitectura que fusiona indicadores técnicos de mercado con el análisis de sentimiento masivo de noticias financieras recopiladas en tiempo real mediante Procesamiento de Lenguaje Natural (NLP).
-
----
-
-## 🏗️ Arquitectura del Sistema (Data Pipeline)
-
-El proyecto está diseñado bajo un enfoque conceptual "Local-First/Nube Híbrida" de coste cero, optimizado para ejecutarse localmente con soporte de aceleración por hardware:
-
-1. **Ingesta y Streaming:** **Apache NiFi** actúa como el extractor perimetral consumiendo APIs de noticias financieras de forma continua. Los datos se transmiten con baja latencia a través de un clúster local de **Apache Kafka**.
-2. **Almacenamiento Híbrido:**
-   * **NoSQL (MongoDB Atlas):** Almacena el flujo de noticias crudas en formato JSON/BSON flexible.
-   * **Data Lake (Amazon S3 / LocalStack):** Resguardo inmutable de las series temporales históricas descargadas de Yahoo Finance (`yfinance`).
-   * **Relacional (Amazon RDS / SQLite):** Repositorio único final donde se consolida el *Dataset Maestro* estructurado e indexado por fecha.
-3. **Procesamiento ETL (AWS Glue Logic):** Proceso encargado de realizar la ingeniería de características (cálculo de RSI, Medias Móviles), extracción del sentiment score empleando el modelo *FinBERT* de Hugging Face y unificación de las fuentes.
+HedgeMind AI es un sistema integral de *Machine Learning* y *Data Engineering* diseñado para predecir la dirección diaria del mercado de la acción de NVIDIA (NVDA). El proyecto combina análisis de series temporales financieras con el Procesamiento de Lenguaje Natural (NLP) aplicado a noticias en tiempo real aplicandolas desde Nifi-kafka-mongodb-Redis.
 
 ---
 
-## 🛠️ Requisitos del Sistema y Stack Técnico
+## 🏗️ Arquitectura de Datos y Decisiones Técnicas
 
-* **Sistema Operativo:** Windows 10/11 (Optimizado para arquitecturas x64)
-* **Entorno de Desarrollo:** Visual Studio Code (VSC)
-* **Hardware Recomendado:** NVIDIA GeForce RTX 4060 (Laptop GPU) con soporte para núcleos Tensor.
-* **Stack Core:**
-  * Miniconda / Anaconda Navigator
-  * CUDA Toolkit 12.4 & cuDNN integrado
-  * Python 3.10.x
-  * PyTorch 2.6.0 con soporte CUDA operativo
+El pipeline está diseñado bajo un enfoque robusto de **MLOps**, dividiendo el ciclo de vida del dato en fases claras:
 
----
+1. **Ingesta y Streaming (NiFi & Kafka):** Se orquesta la captura de noticias en tiempo real mediante Apache NiFi, inyectándolas en tópicos de Kafka para garantizar la resiliencia ante picos de información bursátil.
+2. **Data Lake (MongoDB Atlas):** Almacenamiento NoSQL para datos no estructurados (textos crudos de noticias de Finnhub, Google y Kaggle). Elegido por su flexibilidad ante esquemas de texto variables.
+3. **Data Warehouse (AWS RDS - MySQL):** Tras el proceso ETL, los datos financieros limpios (Yahoo Finance) y las características extraídas de las noticias se integran estructuralmente en la nube. Se escoge un motor relacional para garantizar la integridad referencial y acelerar las consultas analíticas del modelo.
+4. **Machine Learning (XGBoost):** Se optó por transformar el problema de Regresión a **Clasificación Direccional**, optimizado con aceleración por hardware. Frente a modelos como Random Forest o SVR, XGBoost demostró mayor resistencia al sobreajuste (Overfitting) intrínseco del mercado financiero.
 
-## 🚀 Instalación y Configuración del Entorno
 
-Sigue estos pasos en orden cronológico para replicar el entorno de desarrollo local en tu terminal de VS Code:
 
-### 1. Clonar el repositorio e ingresar al directorio
-```bash
-git clone [https://github.com/tu-usuario/analisisBursatilIA.git](https://github.com/tu-usuario/analisisBursalilIA.git)
-cd analisisBursatilIA
+## 📂 Estructura del Repositorio
 
-# 🧠 HedgeMind-NVDA: Predicción Bursátil Híbrida mediante IA y NLP
 
-![Python](https://img.shields.io/badge/Python-3.10-blue.svg)
-![XGBoost](https://img.shields.io/badge/XGBoost-1.7-green.svg)
-![Docker](https://img.shields.io/badge/Docker-Architecture-blue)
-![HuggingFace](https://img.shields.io/badge/HuggingFace-Deployed-orange)
+📁 HedgeMind-NVDA-TFM
+├── 📁 hitos/                # Cuadernos Jupyter con EDA, entrenamiento y predicción
+│   ├── 01_etl_y_eda.ipynb
+│   ├── 02_entrenamiento_modelos.ipynb
+│   └── 03_despliegue_y_mejoras.ipynb
+├── 📁 src/                     # Código fuente y módulos funcionales
+│   ├── 📁 huggingFace/         # Artefactos del modelo (.pkl) y app.py de Gradio
+│   ├── 📁 mongodb/             # Conectores y scripts de Data Lake
+│   ├── 📁 RDS/                 # Conectores y scripts de Data Warehouse
+│   └── pipelineHedgemind.py    # Script ETL principal
+├── docker-compose.yml          # Infraestructura (NiFi, Kafka, Zookeeper)
+├── orquestador_maestro.py      # Script único de despliegue automático
+├── requirements.txt            # Dependencias del proyecto
+└── README.md                   # Documentación técnica
 
-## 📌 Descripción del Proyecto
-HedgeMind-NVDA es un sistema integral de Ingeniería de Datos y Machine Learning diseñado para predecir el movimiento direccional de las acciones de NVIDIA (NVDA). El proyecto fusiona **Análisis Técnico Clásico** (RSI, Volumen de operaciones, Precios de cierre) con **Análisis de Sentimiento en Tiempo Real (NLP)** extraído de noticias financieras.
+## Para cumplir con la automatización del proyecto, se ha desarrollado un Script Único que levanta la infraestructura y orquesta el procesamiento.
 
-## 🏗️ Arquitectura de Datos y Despliegue
-Para reproducir este proyecto desde cero, el repositorio incluye un script de orquestación principal.
 
-### Despliegue Rápido (Script Único)
-Abra una terminal de PowerShell en la raíz del proyecto y ejecute:
-```powershell
-.\despliegue.ps1
+### Pre-requisitos del Sistema:
+* **Entorno CUDA (Aceleración por GPU):** Para el procesamiento acelerado de los algoritmos de Machine Learning (XGBoost) y NLP (PyTorch), se requiere una tarjeta gráfica NVIDIA compatible (ej. arquitectura RTX) con los controladores actualizados y el entorno **CUDA Toolkit** configurado en el sistema.
+* **Docker Desktop** instalado y en ejecución (para la infraestructura de streaming).
+* **Python 3.9 o superior** instalado en el entorno local.
+* Archivo `.env` configurado en la raíz con las credenciales de los servicios Cloud (`DB_USER`, `DB_PASSWORD`, `MONGO_URI`,...).
+
+## Ejecución paso a paso:
+Clona este repositorio e instala las dependencias:
+
+Bash
+pip install -r requirements.txt
+
+## Ejecuta el orquestador maestro:
+
+Bash
+python deploy.py
