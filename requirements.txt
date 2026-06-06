@@ -40,3 +40,12 @@ huggingface_hub>=0.14.1
 # --- Finnhub API financiera ---
 finnhub-python>=1.0.0
 feedparser>=6.0.8
+
+Plaintext
+# --- Gradio para despliegue de la interfaz ---
+xgboost
+scikit-learn
+pandas
+numpy
+joblib
+gradio
