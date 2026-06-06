@@ -53,7 +53,11 @@ El pipeline está diseñado bajo un enfoque robusto de **MLOps**, dividiendo el 
 * Archivo `.env` configurado en la raíz con las credenciales de los servicios Cloud (`DB_USER`, `DB_PASSWORD`, `MONGO_URI`,...).
 
 ## Ejecución paso a paso:
-Clona este repositorio e instala las dependencias:
+*Clona este repositorio e instala las dependencias:*
+
+## Crear y acticar el entorno virtual de Conda
+*conda create --name tfm_ai python=3.10 -y*
+*conda activate tfm_ai*
 
 Bash
 pip install -r requirements.txt
