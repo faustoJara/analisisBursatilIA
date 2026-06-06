@@ -27,3 +27,16 @@ vadersentiment transformers datasets
 kagglehub
 kafka-python redis beautifulsoup4
 mysql-connector-python pymongo boto3 python-dotenv
+huggingface_hub gradio
+
+# --- Sentiment Analysis ---
+vadersentiment>=3.3.2
+transformers>=4.30.0
+datasets>=3.2.0
+
+# --- HUGGING FACE HUB ---
+huggingface_hub>=0.14.1
+
+# --- Finnhub API financiera ---
+finnhub-python>=1.0.0
+feedparser>=6.0.8

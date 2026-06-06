@@ -16,6 +16,8 @@ __pycache__/
 
 # Para acticar el entorno virtual, puedes usar el siguiente comando en tu terminal:
 # conda activate tfm_ai
-raw_analyst_headlines.csv
-raw_analyst_ratings.csv
+noticiaskaggle.csv
+dataset_entrenamiento_final.csv
+noticiasfinnhubNVDA.csv
+noticiasGoogleNVDA.csv
 

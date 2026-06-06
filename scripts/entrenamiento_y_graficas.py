@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 print("📥 Conectando a AWS RDS para extraer y cruzar datos históricos...")
 load_dotenv()
 # Archivo local de entrenamiento mezclando Dataset Técnico y Sentimiento (noticias)
-archivo_local = "dataset_entrenamiento.csv"
+archivo_local = "../datasets/dataset_entrenamiento_final.csv"
 
 try:
     db = mysql.connector.connect(

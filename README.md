@@ -1,5 +1,7 @@
 # HedgeMind-NVDA 🚀 📈
 
+
+
 ### Sistema Híbrido de Predicción Bursátil Mediante Ingeniería de Datos y Análisis de Sentimiento
 
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/)
@@ -47,3 +49,21 @@ Sigue estos pasos en orden cronológico para replicar el entorno de desarrollo l
 ```bash
 git clone [https://github.com/tu-usuario/analisisBursatilIA.git](https://github.com/tu-usuario/analisisBursalilIA.git)
 cd analisisBursatilIA
+
+# 🧠 HedgeMind-NVDA: Predicción Bursátil Híbrida mediante IA y NLP
+
+![Python](https://img.shields.io/badge/Python-3.10-blue.svg)
+![XGBoost](https://img.shields.io/badge/XGBoost-1.7-green.svg)
+![Docker](https://img.shields.io/badge/Docker-Architecture-blue)
+![HuggingFace](https://img.shields.io/badge/HuggingFace-Deployed-orange)
+
+## 📌 Descripción del Proyecto
+HedgeMind-NVDA es un sistema integral de Ingeniería de Datos y Machine Learning diseñado para predecir el movimiento direccional de las acciones de NVIDIA (NVDA). El proyecto fusiona **Análisis Técnico Clásico** (RSI, Volumen de operaciones, Precios de cierre) con **Análisis de Sentimiento en Tiempo Real (NLP)** extraído de noticias financieras.
+
+## 🏗️ Arquitectura de Datos y Despliegue
+Para reproducir este proyecto desde cero, el repositorio incluye un script de orquestación principal.
+
+### Despliegue Rápido (Script Único)
+Abra una terminal de PowerShell en la raíz del proyecto y ejecute:
+```powershell
+.\despliegue.ps1
