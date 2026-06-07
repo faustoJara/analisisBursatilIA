@@ -15,7 +15,7 @@ API_KEY = os.getenv("FINNHUB_API_KEY")
 MONGO_URI = os.getenv("MONGO_URI")
 
 if not API_KEY or not MONGO_URI:
-    print("❌ ERROR: Faltan credenciales (FINNHUB_API_KEY o MONGO_URI) en el archivo .env")
+    print("ERROR: Faltan credenciales (FINNHUB_API_KEY o MONGO_URI) en el archivo .env")
     exit()
 
 # Conexión a MongoDB (Base de datos HedgeMind)
@@ -31,18 +31,18 @@ col_kaggle = db['kaggleNVDA']
 col_finnhub.drop()
 col_google.drop()
 col_kaggle.drop()
-print("🧹 Colecciones ('finnhubNVDA', 'googleNVDA', 'kaggleNVDA') limpiadas para nueva ingesta.")
+print("Colecciones ('finnhubNVDA', 'googleNVDA', 'kaggleNVDA') limpiadas para nueva ingesta.")
 
 finnhub_client = finnhub.Client(api_key=API_KEY)
 ticker = "NVDA"
 
-print("🚀 INICIANDO INGESTA HACIA MONGODB DATA LAKE...")
+print("INICIANDO INGESTA HACIA MONGODB DATA LAKE...")
 
 # ==========================================
 # 1. FINNHUB -> Colección: finnhubNVDA
 # ==========================================
 def extraer_finnhub(ticker, meses_atras=12):
-    print(f"📥 [FINNHUB] Descargando noticias de {ticker}...")
+    print(f"[FINNHUB] Descargando noticias de {ticker}...")
     todas_las_noticias = []
     fecha_actual = datetime.now()
     
@@ -56,7 +56,7 @@ def extraer_finnhub(ticker, meses_atras=12):
             todas_las_noticias.extend(bloque)
             time.sleep(1) 
         except Exception as e:
-            print(f"   ⚠️ Error bloque {str_inicio}: {e}")
+            print(f"Error bloque {str_inicio}: {e}")
         fecha_actual = fecha_inicio_bloque
     return todas_las_noticias
 
@@ -70,13 +70,13 @@ if noticias_finnhub:
     # Seleccionar columnas y enviar a la colección específica
     records_f = df_f[['date', 'title', 'content', 'source', 'url', 'origen_dato']].to_dict("records")
     col_finnhub.insert_many(records_f)
-    print(f"✅ [FINNHUB] {len(records_f)} documentos inyectados en la colección 'finnhubNVDA'.")
+    print(f"[FINNHUB] {len(records_f)} documentos inyectados en la colección 'finnhubNVDA'.")
 
 # ==========================================
 # 2. GOOGLE NEWS -> Colección: googleNVDA
 # ==========================================
 def extraer_google_news(ticker):
-    print(f"📥 [GOOGLE NEWS] Descargando titulares de {ticker}...")
+    print(f"[GOOGLE NEWS] Descargando titulares de {ticker}...")
     url = f"https://news.google.com/rss/search?q={ticker}&hl=es&gl=ES&ceid=ES:es"
     feed = feedparser.parse(url)
     
@@ -95,12 +95,12 @@ def extraer_google_news(ticker):
 noticias_google = extraer_google_news(ticker)
 if noticias_google:
     col_google.insert_many(noticias_google)
-    print(f"✅ [GOOGLE NEWS] {len(noticias_google)} documentos inyectados en la colección 'googleNVDA'.")
+    print(f"[GOOGLE NEWS] {len(noticias_google)} documentos inyectados en la colección 'googleNVDA'.")
 
 # ==========================================
 # 3. KAGGLE -> Colección: kaggleNVDA
 # ==========================================
-print("📥 [KAGGLE] Leyendo dataset histórico...")
+print("[KAGGLE] Leyendo dataset histórico...")
 ruta_kaggle = "../datasets/noticiaskaggle.csv" 
 
 if os.path.exists(ruta_kaggle):
@@ -118,7 +118,8 @@ if os.path.exists(ruta_kaggle):
         df_k = df_k[cols_necesarias]
         
         # --- EL SALVACAÍDAS DE LA CUOTA: FILTRADO SECTORIAL ---
-        print(f"   🔍 Dataset original: {len(df_k)} filas. Filtrando por sector...")
+        print(f"Dataset original: {len(df_k)} filas. Filtrando por sector...")
+        # Se busca que el título contenga al menos una de las palabras clave relacionadas con el sector tecnológico y semiconductores
         keywords = ['nvda', 'nvidia', 'semiconductor', 'chip', 'amd', 'intel', 'tsmc', 'gpu', 'ai']
         pattern = '|'.join([f"\\b{kw}\\b" for kw in keywords])
         df_k = df_k[df_k['title'].str.contains(pattern, case=False, na=False)].copy()
@@ -135,16 +136,24 @@ if os.path.exists(ruta_kaggle):
             col_kaggle.insert_many(records_k)
             print(f"✅ [KAGGLE] {len(records_k)} documentos inyectados en la colección 'kaggleNVDA'.")
     else:
-        print("⚠️ [KAGGLE] El CSV no tiene las columnas necesarias (date, title).")
+        print(f"[KAGGLE] El CSV no tiene las columnas necesarias (date, title).")
 else:
-    print(f"⚠️ [KAGGLE] Archivo no encontrado en {ruta_kaggle}")
+    print(f"[KAGGLE] Archivo no encontrado en {ruta_kaggle}")
 
 # ==========================================
 # RESUMEN FINAL
 # ==========================================
 print("\n" + "="*50)
-print(f"🎉 INGESTA A HEDGEMIND_DB COMPLETADA EXITOSAMENTE")
-print(f"🗄️ Documentos en 'finnhubNVDA': {col_finnhub.count_documents({})}")
-print(f"🗄️ Documentos en 'googleNVDA':  {col_google.count_documents({})}")
-print(f"🗄️ Documentos en 'kaggleNVDA':  {col_kaggle.count_documents({})}")
+print(f"INGESTA A HEDGEMIND_DB COMPLETADA EXITOSAMENTE")
+print(f"Documentos en 'finnhubNVDA': {col_finnhub.count_documents({})}")
+print(f"Documentos en 'googleNVDA':  {col_google.count_documents({})}")
+print(f"Documentos en 'kaggleNVDA':  {col_kaggle.count_documents({})}")
 print("="*50)
+
+
+# En este script se realiza la extracción de datos desde tres fuentes distintas 
+# (Finnhub, Google News y un dataset de Kaggle) y se almacenan 
+# en una base de datos MongoDB. Se incluyen validaciones 
+# para asegurar que las credenciales estén presentes, manejo de 
+# errores durante la extracción, y un resumen final de la cantidad de documentos 
+# insertados en cada colección.
