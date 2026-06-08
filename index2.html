@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HedgeMind AI - Plataforma Analítica Institucional</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script type="module">
+        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+        window.GradioClient = { Client };
+    </script>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .crypto-gradient { background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex items-center justify-center crypto-gradient">
+
+    <div id="auth-screen" class="absolute inset-0 z-50 flex items-center justify-center crypto-gradient">
+        <div id="login-container" class="w-full max-w-md p-8 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-850 shadow-2xl animate__animated animate__fadeIn">
+            <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 text-center">HedgeMind AI</h1>
+            <form id="login-form" class="mt-6 space-y-4">
+                <input type="text" id="login-user" required class="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white" placeholder="Usuario">
+                <input type="password" id="login-pass" required class="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white" placeholder="Contraseña">
+                <button type="submit" class="w-full py-3 bg-emerald-500 font-bold rounded-lg text-black cursor-pointer">Ingresar</button>
+            </form>
+            <button onclick="toggleAuthView('register')" class="w-full mt-4 text-xs text-emerald-400">⚙️ Crear usuario temporal</button>
+        </div>
+        <div id="register-container" class="hidden w-full max-w-md p-8 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-850 shadow-2xl">
+            <input type="text" id="reg-user" placeholder="Nuevo Usuario" class="w-full mb-2 px-4 py-2 bg-slate-950 rounded-lg">
+            <input type="password" id="reg-pass" placeholder="Contraseña" class="w-full mb-4 px-4 py-2 bg-slate-950 rounded-lg">
+            <button onclick="registrarUsuario()" class="w-full py-2 bg-cyan-500 font-bold rounded-lg text-black">Guardar en Memoria</button>
+            <button onclick="toggleAuthView('login')" class="w-full mt-2 text-xs text-slate-400">Volver al Login</button>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden w-full h-full flex overflow-hidden">
+        <aside class="w-64 bg-slate-950 border-r border-slate-900 flex flex-col justify-between p-6">
+            <div class="space-y-8">
+                <h2 class="text-xl font-black text-emerald-400">HEDGEMIND</h2>
+                <nav class="space-y-2">
+                    <button onclick="switchTab('inicio')" class="nav-btn w-full px-4 py-3 rounded-xl bg-slate-900 text-emerald-400 border-l-4 border-emerald-400 text-left">🏠 Inicio</button>
+                    <button onclick="switchTab('prediccion')" class="nav-btn w-full px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 text-left">🚀 Terminal</button>
+                    <button onclick="switchTab('graficos')" class="nav-btn w-full px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 text-left">📊 Histórico</button>
+                </nav>
+            </div>
+            <button onclick="logout()" class="text-xs bg-slate-900 p-2 rounded-lg text-slate-400">Salir</button>
+        </aside>
+
+        <main class="flex-1 bg-slate-900/40 p-10 overflow-y-auto">
+            <section id="tab-inicio" class="tab-content active space-y-6">
+                <h1 class="text-3xl font-bold">Plataforma Quantitative</h1>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-6 bg-slate-950 rounded-2xl border-t-4 border-t-emerald-500">
+                        <p class="text-xs uppercase text-slate-500">Precisión (Long)</p>
+                        <p class="text-4xl font-bold mt-2">56.00%</p>
+                    </div>
+                    <div class="p-6 bg-slate-950 rounded-2xl border-t-4 border-t-blue-500">
+                        <p class="text-xs uppercase text-slate-500">Orquestación</p>
+                        <p class="text-4xl font-bold mt-2">NiFi</p>
+                    </div>
+                    <div class="p-6 bg-slate-950 rounded-2xl border-t-4 border-t-purple-500">
+                        <p class="text-xs uppercase text-slate-500">Modelo</p>
+                        <p class="text-4xl font-bold mt-2">XGBoost</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-prediccion" class="tab-content space-y-6">
+                <h1 class="text-3xl font-bold">Terminal Predictiva</h1>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-slate-950 p-6 rounded-2xl border border-slate-850">
+                        <input type="number" id="Precio de Cierre Actual (Close USD)" value="135.50" class="w-full mb-4 px-4 py-2 bg-slate-900 rounded-lg font-mono">
+                        <input type="number" id="Volumen de Transacciones Financieras" value="45000000" class="w-full mb-4 px-4 py-2 bg-slate-900 rounded-lg font-mono">
+                        <input type="number" id="Volumen de Noticias Diario (Data Lake)" value="125" class="w-full mb-4 px-4 py-2 bg-slate-900 rounded-lg font-mono">
+                        <button onclick="ejecutarInferenciaReal()" id="btn-predict" class="w-full py-3 bg-emerald-500 text-black font-bold rounded-lg cursor-pointer">Evaluar Inferencia</button>
+                    </div>
+                    <div id="resultado-output" class="bg-slate-950 p-6 rounded-2xl border border-slate-850 flex items-center justify-center">
+                        <p class="text-slate-500">Esperando inferencia...</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-graficos" class="tab-content space-y-6">
+                <select id="rango-tiempo" onchange="cambiarRangoGrafico()" class="bg-slate-900 p-2 rounded-lg">
+                    <option value="20d">20 Días</option><option value="1m">1 Mes</option><option value="3m">3 Meses</option>
+                </select>
+                <div class="bg-slate-950 p-6 rounded-2xl h-[400px] border border-slate-850">
+                    <canvas id="financialChart"></canvas>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function obtenerUsuariosDB() {
+            let db = {};
+            try { db = JSON.parse(sessionStorage.getItem('hedgemind_users')) || {}; } catch(e) {}
+            db['faujarbun'] = 'admin';
+            return db;
+        }
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-user').value.trim().toLowerCase();
+            const p = document.getElementById('login-pass').value.trim();
+            const db = obtenerUsuariosDB();
+            if(db[u] && db[u] === p) {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('user-display').innerText = u.toUpperCase();
+                if(!chartInstance) inicializarGrafico();
+            } else { alert('Credenciales incorrectas'); }
+        });
+
+        function logout() { location.reload(); }
+        function toggleAuthView(v) {
+            document.getElementById('login-container').classList.toggle('hidden');
+            document.getElementById('register-container').classList.toggle('hidden');
+        }
+
+        function registrarUsuario() {
+            const u = document.getElementById('reg-user').value.trim().toLowerCase();
+            const p = document.getElementById('reg-pass').value.trim();
+            if(!u || !p) return;
+            let db = obtenerUsuariosDB();
+            db[u] = p;
+            sessionStorage.setItem('hedgemind_users', JSON.stringify(db));
+            alert('Guardado');
+            toggleAuthView('login');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+        }
+
+       // --- CONEXIÓN API GRADIO CLIENT ---
+        async function ejecutarInferenciaReal() {
+            const output = document.getElementById('resultado-output');
+            const btnPredict = document.getElementById('btn-predict');
+            
+            // 1. Obtener valores y validar (¡Cuidado con la coma decimal, JS prefiere punto!)
+            const closeVal = parseFloat(document.getElementById('input-close').value.replace(',', '.'));
+            const volVal = parseFloat(document.getElementById('input-volume').value);
+            const newsVal = parseFloat(document.getElementById('input-news').value);
+
+            if (isNaN(closeVal) || isNaN(volVal) || isNaN(newsVal)) {
+                output.innerHTML = '<p class="text-red-400 text-sm">⚠️ Valores inválidos.</p>';
+                return;
+            }
+
+            output.innerHTML = "Conectando con el motor...";
+            
+            try {
+                // 2. Conexión al Space
+                const client = await window.GradioClient.Client.connect("faujarbun/HedgeMind-NVDA");
+                
+                // 3. Predicción
+                // IMPORTANTE: El nombre del endpoint suele ser "/predict" por defecto en Gradio, 
+                // a menos que en tu app.py hayas nombrado la función de forma distinta.
+                const result = await client.predict("/predict", { 
+                    close: closeVal, 
+                    volume: volVal, 
+                    news_volume: newsVal 
+                });
+                
+                // 4. Mostrar resultados
+                output.innerHTML = `
+                    <p class="text-emerald-400 font-bold text-xl">${result.data[0]}</p>
+                    <p class="text-xs text-slate-400 mt-2">${result.data[1]}</p>
+                `;
+            } catch(e) {
+                console.error(e);
+                output.innerHTML = "Error: " + e.message;
+            }
+        }
+
+        let chartInstance = null;
+        function cambiarRangoGrafico() { inicializarGrafico(document.getElementById('rango-tiempo').value); }
+        function inicializarGrafico(rango = '20d') {
+            const ctx = document.getElementById('financialChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, { type: 'line', data: { labels: Array.from({length:20}, (_,i)=>i), datasets: [{ data: [118, 120, 119, 122, 121, 124, 123, 126, 125, 128, 127, 130, 129, 132, 131, 134, 132, 136, 135, 138], borderColor: '#10b981' }] }, options: { responsive: true, maintainAspectRatio: false } });
+        }
+    </script>
+</body>
+</html>

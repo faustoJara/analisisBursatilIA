@@ -29,7 +29,7 @@ matplotlib>=3.7.2
 seaborn>=0.12.2
 
 # --- MACHINE LEARNING Y PREDICCIÓN ---
-scikit-learn>=1.3.0
+scikit-learn>=1.7.2
 xgboost>=2.0.0
 lightgbm>=4.0.0
 catboost>=1.2.0

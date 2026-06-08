@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HedgeMind AI - Plataforma Analítica Institucional</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .crypto-gradient { background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex items-center justify-center crypto-gradient">
+
+    <div id="auth-screen" class="absolute inset-0 z-50 flex items-center justify-center crypto-gradient">
+        
+        <div id="login-container" class="w-full max-w-md p-8 space-y-6 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-850 shadow-2xl animate__animated animate__fadeIn">
+            <div class="text-center">
+                <h1 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">HedgeMind AI</h1>
+                <p class="mt-2 text-sm text-slate-400">Acceso Institucional</p>
+            </div>
+            
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Usuario Analista</label>
+                    <input type="text" id="login-user" required class="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:border-emerald-500 text-slate-200" placeholder="Ingrese su usuario">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Contraseña</label>
+                    <input type="password" id="login-pass" required class="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:border-emerald-500 text-slate-200" placeholder="••••••••">
+                </div>
+                
+                <div id="login-error" class="hidden p-3 bg-red-950/50 border border-red-800 rounded-lg text-red-400 text-xs flex items-center space-x-2">
+                    <span>❌ Credenciales incorrectas. Inténtalo de nuevo.</span>
+                </div>
+
+                <button type="submit" class="w-full py-3 mt-4 font-semibold text-slate-950 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-lg hover:opacity-90 transition shadow-lg shadow-emerald-500/20 cursor-pointer">
+                    Ingresar al Sistema
+                </button>
+            </form>
+            
+            <div class="text-center pt-4 border-t border-slate-800">
+                <button type="button" onclick="toggleAuthView('register')" class="text-sm text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer">⚙️ Configuración: Crear usuario temporal</button>
+            </div>
+        </div>
+
+        <div id="register-container" class="hidden w-full max-w-md p-8 space-y-6 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-850 shadow-2xl animate__animated animate__fadeIn">
+            <div class="text-center">
+                <h2 class="text-xl font-bold text-emerald-400">Nuevo Analista (Volátil)</h2>
+                <p class="text-xs text-slate-400 mt-2">El usuario se guardará en memoria para pruebas en vivo y se borrará al cerrar el navegador.</p>
+            </div>
+            
+            <form id="register-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Nombre de Usuario</label>
+                    <input type="text" id="reg-user" required class="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:border-cyan-500 text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Contraseña</label>
+                    <input type="password" id="reg-pass" required class="w-full px-4 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:border-cyan-500 text-slate-200">
+                </div>
+                
+                <p id="reg-msg" class="hidden text-xs text-center"></p>
+
+                <button type="button" onclick="registrarUsuario()" class="w-full py-3 mt-2 font-semibold text-white bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-lg transition cursor-pointer">
+                    Guardar en Memoria de Sesión
+                </button>
+                <button type="button" onclick="toggleAuthView('login')" class="w-full py-2 text-sm text-slate-400 hover:text-slate-200 transition cursor-pointer">
+                    Volver al Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden w-full h-full flex overflow-hidden animate__animated animate__fadeIn">
+        
+        <aside class="w-64 bg-slate-950 border-r border-slate-900 flex flex-col justify-between p-6">
+            <div class="space-y-8">
+                <div>
+                    <h2 class="text-xl font-black tracking-wider text-emerald-400">HEDGEMIND</h2>
+                    <p class="text-xs text-slate-500">Panel de Control Multiclase</p>
+                </div>
+                <nav class="space-y-2">
+                    <button onclick="switchTab('inicio')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-slate-900 text-emerald-400 font-medium border-l-4 border-emerald-400 text-left cursor-pointer transition">
+                        <span>🏠 Inicio</span>
+                    </button>
+                    <button onclick="switchTab('prediccion')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium border-l-4 border-transparent text-left cursor-pointer transition">
+                        <span>🚀 Terminal de Inferencia</span>
+                    </button>
+                    <button onclick="switchTab('graficos')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-slate-200 font-medium border-l-4 border-transparent text-left cursor-pointer transition">
+                        <span>📊 Gráficos Dinámicos</span>
+                    </button>
+                </nav>
+            </div>
+            
+            <div class="p-4 bg-slate-900 rounded-xl border border-slate-850 flex items-center justify-between">
+                <div class="overflow-hidden">
+                    <p class="text-xs text-slate-500">Analista Activo:</p>
+                    <p id="user-display" class="text-sm font-bold text-slate-300 truncate">FAUJARBUN</p>
+                </div>
+                <button onclick="logout()" class="text-xs bg-slate-950 hover:bg-red-950/40 text-slate-400 hover:text-red-400 p-2 rounded-lg transition cursor-pointer">Salir</button>
+            </div>
+        </aside>
+
+        <main class="flex-1 bg-slate-900/40 p-10 overflow-y-auto">
+            
+            <section id="tab-inicio" class="tab-content active space-y-6">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">Plataforma Avanzada de Inversión Quantitative</h1>
+                    <p class="text-slate-400 text-sm mt-1">Análisis predictivo direccional optimizado sobre el ticker <span class="text-emerald-400 font-semibold">NVDA (NVIDIA Corp)</span>.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-6 bg-slate-950 border border-slate-850 rounded-2xl shadow-xl border-t-4 border-t-emerald-500">
+                        <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Precisión de Señal (Long)</h3>
+                        <p class="text-4xl font-bold text-slate-200 mt-2">56.00%</p>
+                        <p class="text-xs text-emerald-400 mt-2">▲ Edge estadístico de validación</p>
+                    </div>
+                    <div class="p-6 bg-slate-950 border border-slate-850 rounded-2xl shadow-xl border-t-4 border-t-blue-500">
+                        <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Orquestación ETL</h3>
+                        <p class="text-4xl font-bold text-slate-200 mt-2">Apache NiFi</p>
+                        <p class="text-xs text-blue-400 mt-2">Streaming activo hacia Mongo Atlas</p>
+                    </div>
+                    <div class="p-6 bg-slate-950 border border-slate-850 rounded-2xl shadow-xl border-t-4 border-t-purple-500">
+                        <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Modelo de Sentimiento</h3>
+                        <p class="text-4xl font-bold text-slate-200 mt-2">FinBERT</p>
+                        <p class="text-xs text-purple-400 mt-2">Análisis de texto no estructurado NLP</p>
+                    </div>
+                </div>
+
+                <div class="p-6 bg-slate-950 border border-slate-850 rounded-2xl shadow-xl">
+                    <h3 class="text-lg font-bold mb-4 text-slate-200 border-b border-slate-800 pb-2">Fuentes de Datos (Data Lake)</h3>
+                    <div class="flex flex-wrap gap-4">
+                        <div class="flex items-center space-x-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg">
+                            <span class="text-xl">📡</span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-300">Finnhub API</p>
+                                <p class="text-[10px] text-slate-500">Noticias Financieras Corporativas</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg">
+                            <span class="text-xl">🌐</span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-300">Google News</p>
+                                <p class="text-[10px] text-slate-500">Web Scraping Generalista</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2 px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg">
+                            <span class="text-xl">📊</span>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-300">Kaggle Datasets</p>
+                                <p class="text-[10px] text-slate-500">Histórico Estructurado Base</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-4 leading-relaxed">
+                        * Toda la ingesta textual es segmentada por NiFi y almacenada en colecciones BSON dentro de MongoDB Atlas antes de su inferencia vectorial.
+                    </p>
+                </div>
+            </section>
+
+            <section id="tab-prediccion" class="tab-content space-y-6">
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">Terminal de Inferencia Colectiva</h1>
+                    <p class="text-slate-400 text-sm">Ejecuta llamadas predictivas en tiempo real interactuando con el backend en Hugging Face.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-slate-950 border border-slate-850 p-6 rounded-2xl shadow-xl">
+                        <h3 class="text-lg font-bold mb-4 text-slate-300">Vector de Entrada (Features)</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-xs text-slate-400 font-semibold">Precio de Cierre (Close USD)</label>
+                                <input type="number" id="input-close" value="135.50" step="0.01" class="w-full mt-1 px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400 font-semibold">Volumen de Transacciones</label>
+                                <input type="number" id="input-volume" value="45000000" class="w-full mt-1 px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400 font-semibold">Volumen de Noticias Diario (Data Lake)</label>
+                                <input type="number" id="input-news" value="125" class="w-full mt-1 px-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+                            </div>
+                            <button onclick="ejecutarInferenciaReal()" id="btn-predecir_direccion" class="w-full py-3 mt-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-lg transition shadow-lg shadow-emerald-500/10 cursor-pointer flex justify-center items-center">
+                                <span>Evaluar Direccionalidad XGBoost</span>
+                                <div id="btn-loader" class="hidden ml-2 w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-850 p-6 rounded-2xl shadow-xl flex flex-col justify-between">
+                        <h3 class="text-lg font-bold text-slate-300 border-b border-slate-800 pb-2">Señal Emitida por el Modelo</h3>
+                        <div id="resultado-output" class="my-auto text-center py-8 space-y-4">
+                            <p class="text-slate-500 text-sm italic">Introduzca métricas y presione evaluar para llamar a la API pública de Hugging Face.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-graficos" class="tab-content space-y-6">
+                <div class="flex justify-between items-end">
+                    <div>
+                        <h1 class="text-3xl font-bold tracking-tight">Análisis Gráfico de Señales</h1>
+                        <p class="text-slate-400 text-sm mt-1">Representación del histórico de auditoría indexada en AWS RDS.</p>
+                    </div>
+                    
+                    <div class="flex flex-col">
+                        <label class="text-xs text-slate-500 mb-1 font-semibold uppercase tracking-wider">Rango Temporal</label>
+                        <select id="rango-tiempo" onchange="cambiarRangoGrafico()" class="bg-slate-900 border border-slate-800 text-slate-300 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block p-2 cursor-pointer outline-none">
+                            <option value="20d">Últimos 20 Días</option>
+                            <option value="1m">Último Mes (30 días)</option>
+                            <option value="3m">Últimos 3 Meses (90 días)</option>
+                            <option value="6m">Últimos 6 Meses (180 días)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-950 border border-slate-850 p-6 rounded-2xl shadow-xl w-full">
+                    <div class="h-[400px] w-full flex items-center justify-center relative">
+                        <canvas id="financialChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // 1. GESTIÓN DE SESIÓN Y VISTAS DE LOGIN
+        function obtenerUsuariosDB() {
+            let db = {};
+            try {
+                db = JSON.parse(sessionStorage.getItem('hedgemind_users')) || {};
+            } catch (e) {
+                db = {};
+            }
+            db['faujarbun'] = 'admin'; // Maestro inmutable
+            return db;
+        }
+
+        function toggleAuthView(view) {
+            document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('reg-msg').classList.add('hidden');
+            
+            if(view === 'register') {
+                document.getElementById('login-container').classList.add('hidden');
+                document.getElementById('register-container').classList.remove('hidden');
+            } else {
+                document.getElementById('register-container').classList.add('hidden');
+                document.getElementById('login-container').classList.remove('hidden');
+            }
+        }
+
+        function registrarUsuario() {
+            const u = document.getElementById('reg-user').value.trim().toLowerCase();
+            const p = document.getElementById('reg-pass').value.trim();
+            const msg = document.getElementById('reg-msg');
+
+            if(!u || !p) {
+                msg.textContent = '❌ Completa usuario y contraseña.';
+                msg.className = 'text-red-400 text-xs text-center mt-2 block';
+                return;
+            }
+
+            let db = obtenerUsuariosDB();
+            db[u] = p;
+            sessionStorage.setItem('hedgemind_users', JSON.stringify(db));
+            
+            msg.textContent = '✅ Guardado. Redirigiendo al Login...';
+            msg.className = 'text-emerald-400 text-xs text-center mt-2 block';
+            
+            setTimeout(() => {
+                document.getElementById('reg-user').value = '';
+                document.getElementById('reg-pass').value = '';
+                toggleAuthView('login');
+            }, 1200);
+        }
+
+        // CONTROL DEL LOGIN PRINCIPAL
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const user = document.getElementById('login-user').value.trim().toLowerCase();
+            const pass = document.getElementById('login-pass').value.trim();
+            const db = obtenerUsuariosDB();
+            const errorDiv = document.getElementById('login-error');
+
+            if (db[user] && db[user] === pass) {
+                // Éxito
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('user-display').innerText = user.toUpperCase();
+                errorDiv.classList.add('hidden');
+                
+                document.getElementById('login-user').value = '';
+                document.getElementById('login-pass').value = '';
+                
+                if(!chartInstance) inicializarGrafico();
+            } else {
+                // Error visual
+                errorDiv.classList.remove('hidden');
+                errorDiv.classList.remove('animate__animated', 'animate__shakeX');
+                void errorDiv.offsetWidth; 
+                errorDiv.classList.add('animate__animated', 'animate__shakeX');
+                document.getElementById('login-pass').value = ''; // Limpiar pass por UX
+            }
+        });
+
+        function logout() {
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('login-error').classList.add('hidden');
+        }
+
+        // 2. NAVEGACIÓN INTERNA
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-900', 'text-emerald-400', 'border-emerald-400');
+                btn.classList.add('text-slate-400', 'border-transparent');
+            });
+            const activeBtn = event.currentTarget;
+            activeBtn.classList.remove('text-slate-400', 'border-transparent');
+            activeBtn.classList.add('bg-slate-900', 'text-emerald-400', 'border-emerald-400');
+            
+            if(tabName === 'graficos' && !chartInstance) {
+                inicializarGrafico();
+            }
+        }
+
+     // --- 3. API REAL HUGGING FACE (Estructura Gradio 4 Definitiva) ---
+        async function ejecutarInferenciaReal() {
+            const output = document.getElementById('resultado-output');
+            const loader = document.getElementById('btn-loader');
+            
+            // Obtener los valores de los inputs
+            const closeVal = parseFloat(document.getElementById('input-close').value.replace(',', '.'));
+            const volVal = parseFloat(document.getElementById('input-volume').value);
+            const newsVal = parseFloat(document.getElementById('input-news').value);
+
+            loader.classList.remove('hidden');
+            output.innerHTML = '<p class="text-xs text-slate-400 animate-pulse">Conectando con motor MLops...</p>';
+
+            try {
+                // Usamos el cliente oficial de Gradio
+                const { Client } = await import("https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js");
+                const client = await Client.connect("faujarbun/HedgeMind-NVDA");
+                
+                // Llamada al endpoint correcto (el que identificaste en tu prueba)
+                // El orden del array debe coincidir con el orden de los inputs en tu app.py
+                const result = await client.predict("/predecir_direccion", [
+                    closeVal, 
+                    volVal, 
+                    newsVal
+                ]);
+
+                loader.classList.add('hidden');
+                
+                // Resultado viene en result.data
+                const resultado = result.data[0];
+                const detalles = result.data[1];
+
+                const esAlcista = resultado.includes("ALCISTA") || resultado.includes("BUY");
+                const colorTexto = esAlcista ? "text-emerald-400" : "text-red-400";
+                const borderBg = esAlcista ? "border-emerald-500/50 bg-emerald-950/20" : "border-red-500/50 bg-red-950/20";
+
+                output.innerHTML = `
+                    <div class="w-full ${borderBg} rounded-xl p-6 border transition-all animate__animated animate__zoomIn">
+                        <h2 class="text-2xl font-extrabold ${colorTexto} mb-2">${resultado}</h2>
+                        <div class="mt-4 p-4 bg-slate-950 rounded-lg border border-slate-800 text-left">
+                            <p class="text-sm text-slate-300 font-mono">${detalles}</p>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                loader.classList.add('hidden');
+                output.innerHTML = `
+                    <div class="p-4 bg-red-950/40 border border-red-900 rounded-lg text-red-400 text-xs">
+                        Error de conexión: ${error.message}
+                    </div>
+                `;
+                console.error("Detalle del error:", error);
+            }
+        }
+
+        // 4. GRÁFICOS DINÁMICOS POR MESES
+        let chartInstance = null;
+
+        function cambiarRangoGrafico() {
+            const rangoSeleccionado = document.getElementById('rango-tiempo').value;
+            inicializarGrafico(rangoSeleccionado);
+        }
+
+        function inicializarGrafico(rango = '20d') {
+            const ctx = document.getElementById('financialChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            
+            let labels = [];
+            let precios = [];
+
+            if (rango === '20d') {
+                labels = Array.from({length: 20}, (_, i) => `Día T-${20-i}`);
+                precios = [118, 120, 119, 122, 121, 124, 123, 126, 125, 128, 127, 130, 129, 132, 131, 134, 132, 136, 135, 138];
+            } else {
+                let diasTotales = rango === '1m' ? 30 : (rango === '3m' ? 90 : 180);
+                let precioActual = rango === '6m' ? 60 : (rango === '3m' ? 85 : 105); 
+                
+                for(let i = diasTotales; i >= 1; i--) {
+                    if (rango === '6m' || rango === '3m') {
+                        labels.push(`T-${i}`);
+                    } else {
+                        labels.push(`Día T-${i}`);
+                    }
+                    precioActual += (Math.random() - 0.45) * 4.5; 
+                    precios.push(parseFloat(precioActual.toFixed(2)));
+                }
+            }
+            
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Precio de Cierre NVDA ($)',
+                        data: precios,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.2,
+                        pointRadius: rango === '20d' || rango === '1m' ? 3 : 0,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { labels: { color: '#94a3b8' } },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: { 
+                            grid: { color: '#1e293b' }, 
+                            ticks: { color: '#94a3b8', maxTicksLimit: 15 } 
+                        },
+                        y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } }
+                    },
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
