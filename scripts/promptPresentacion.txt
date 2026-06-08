@@ -1,0 +1,41 @@
+Instrucción: Actúa como un experto en MLOps y Finanzas Cuantitativas. 
+A partir de los documentos del proyecto "HedgeMind-NVDA", 
+genera un guion detallado para una presentación de defensa de TFM de 20 minutos.
+Estructura requerida: Genera un esquema de 18 diapositivas de contenido más una diapositiva final
+ de agradecimiento, siguiendo este orden lógico:
+ Diapositiva 1: Portada (Título, Autor).
+ Diapositiva 2: El Problema: Volatilidad en semiconductores y el ruido mediático de NVIDIA.
+ Diapositiva 3: Justificación Teórica: Hipótesis de Mercados Eficientes vs. Finanzas Conductuales.
+ Diapositiva 4: Objetivos del Proyecto: Arquitectura Big Data y Predicción Direccional.
+ Diapositiva 5: Arquitectura de Datos (Hito 1): El ecosistema híbrido (Local/Docker + Cloud).
+ Diapositiva 6: Ingesta en Streaming: Configuración de Apache NiFi y Kafka (Control de flujo).
+ Diapositiva 7: Capa de Persistencia: MongoDB Atlas (Data Lake NoSQL) y AWS RDS (Data Warehouse).
+ Diapositiva 8: Ingeniería de Características: Retornos logarítmicos y normalización de volumen.
+ Diapositiva 9: El Pivote Estratégico: Por qué el $R^2$ negativo invalidó la Regresión.
+ Diapositiva 10: Metodología de Clasificación: De predecir magnitud a predecir signo (Sube/Baja).
+ Diapositiva 11: Comparativa de Modelos: El colapso de Random Forest vs. la estabilidad de XGBoost.
+ Diapositiva 12: Optimización (GridSearch): Por qué elegimos un modelo conservador (max_depth=4).
+ Diapositiva 13: Resultados Globales: Análisis del 52.00% de Accuracy direccional.
+ Diapositiva 14: El "Edge" de Negocio: La precisión del 56% en señales de compra (Precision Class 1).
+ Diapositiva 15: Experimento de Fine-Tuning: El fracaso del modelo post-2023 (46.51%) y su lección técnica.
+ Diapositiva 16: MLOps y Despliegue: Serialización con .pkl, Gradio y Hugging Face Spaces.
+ Diapositiva 17: Orquestación Final: El script deploy.py y la automatización End-to-End.
+ Diapositiva 18: Conclusiones y Líneas Futuras.
+ Diapositiva 19: Agradecimientos y Turno de Preguntas.
+ Requisitos adicionales:Para cada diapositiva, incluye: Título sugerido,
+  Puntos clave a decir (bullet points) y Gráfico/Captura recomendada (ej. Matriz de confusión,
+   Esquema NiFi, Tabla de modelos).Usa los datos exactos: Accuracy 52%, Precisión compra 56%,
+    Fine-tuning 46.51%.El tono debe ser de "Ingeniero Senior defendiendo una decisión de 
+    arquitectura ante un tribunal experto".🎨 Guía de Estilo: Cómo crear la presentaciónPara
+     que la presentación visual esté a la altura de tu código, sigue estas reglas de diseño:1. 
+     Identidad Visual (Branding)Dado que tu Dashboard en AWS y Gradio tiene un estilo "Dark Mode"
+      profesional, traslada eso a tus diapositivas:Fondo: Gris muy oscuro o Negro azulado 
+      (Slate-900).Títulos: Color Cyan (Cyan-400) o Blanco puro.Acentos (Éxito): Verde Esmeralda
+       (Emerald-400) para los resultados positivos (como el 56% de precisión).
+       Acentos (Errores/Alertas): Ámbar o Rojo suave para explicar el R² negativo o el fracaso 
+       del Fine-tuning.2. Menos Texto, Más DiagramasDiapositiva de Arquitectura: No expliques NiFi
+        con texto. Pon la captura de pantalla de tu NiFi con todos los procesadores en verde (▶) 
+        que conseguimos hoy.Diapositiva de Modelos: Usa la tabla de ranking (RMSE y R²)
+         que generamos en el Hito 2.Diapositiva de Resultados: Pon en grande la Matriz de
+          Confusión. Es lo que el tribunal querrá ver para creerte.3. El "Ritmo" de la Defensa 
+          
