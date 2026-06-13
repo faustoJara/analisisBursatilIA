@@ -1,0 +1,32 @@
+Para devolverle al proyecto, tenemos que actualizar la IP y volver a encender los motores:
+
+Paso 1: Descubre tu nueva IP
+Ve a la consola web de AWS, entra en EC2 -> Instances, haz clic en tu máquina (HedgeMind-Server) y busca el recuadro que dice Public IPv4 address. Cópiala.
+(A partir de ahora, usa esta nueva IP para todo, incluyendo conectarte por SSH desde tu terminal).
+
+Paso 2: Actualiza el código de tu web
+Como tu archivo index.html sigue intentando buscar a la IA en la IP antigua, tenemos que cambiarlo. Conéctate a tu servidor por terminal (SSH) y edita el archivo:
+
+Abre el editor:
+
+Bash
+nano ~/hedgemind-Server/index.html
+Busca la línea del <iframe src="http://34.230.86.230:7860"...> y cambia la IP vieja por tu IP nueva.
+
+Guarda y sal (Ctrl + O, Enter, Ctrl + X).
+
+Paso 3: Vuelve a encender los servidores
+Ahora solo falta volver a lanzar los programas para que se queden trabajando en segundo plano. Ejecuta esto en tu terminal:
+
+1. Enciende la web principal (Puerto 80):
+
+Bash
+cd ~/hedgemind-Server
+sudo nohup python3 -m http.server 80 > web_logs.txt 2>&1 &
+2. Enciende la IA de Gradio (Puerto 7860):
+
+Bash
+cd ~/hedgemind-Server/src/huggingFace
+nohup env GRADIO_SERVER_NAME="0.0.0.0" python3 -u app.py > logs.txt 2>&1 &
+
+Ve a tu navegador, escribe http://TU_NUEVA_IP y tu proyecto volverá a aparecer exactamente igual que antes.
